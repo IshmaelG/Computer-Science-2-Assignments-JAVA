@@ -1,0 +1,179 @@
+package sequencealignment;
+
+/* Name: Ishmael Garcia (3526912)
+ * Dr. Andrew Steinberg
+ * COP3503 Fall 2021
+ * Programming Assignment 4
+ */
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Arrays;
+
+public class SequenceAlignment 
+{
+	//initializing private variables for the class
+	private static final Set<Character> vowels = new HashSet<>(Arrays.asList(new Character[] { 'a', 'e', 'i', 'o', 'u' }));
+	private static final Set<Character> consonants = new HashSet<>(Arrays.asList(new Character[] { 'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z' }));
+	private int gp = 2;
+	private int[][] memot;
+	private int[][][] predind;
+	private static final String line = "-";
+	private String s1;
+	private String s2;
+	
+	// constructor to initialized passed strings
+	public SequenceAlignment(String s1, String s2)
+	{
+		this.s1 = s1;
+		this.s2 = s2;
+	}
+	
+	//dynamic programming using Needleman–Wunsch algorithm
+	public void computeAlignment(int z)
+	{
+		//space in front of string to simplify method calling/boundaries
+		s1 = " " + s1;
+		s2 = " " + s2;
+		//nitialize 2D arrays for memoization
+				memot = new int[s1.length()][s2.length()];
+				predind = new int[s1.length()][s2.length()][2];
+
+				
+				//insert for beginning column
+				for (int i = 0; i < s1.length(); i++) 
+				{	
+					memot[i][0] = i * this.gp;
+					predind[i][0][0] = i - 1;
+					predind[i][0][1] = 0;
+				}
+				
+				//insert for beginning row
+				for (int j = 0; j < s2.length(); j++) 
+				{
+					memot[0][j] = j * this.gp;
+					predind[0][j][0] = 0;
+					predind[0][j][1] = j - 1;
+				}
+				//no predecessor so upper left with negative predecessor
+				predind[0][0][0] = -1;
+				predind[0][0][1] = -1;
+
+
+				//fill memo table
+				for (int j = 1; j < s2.length(); j++) {
+					for (int i = 1; i < s1.length(); i++) {
+						//when aligned with each other
+						int aligncharpen = penalty(s1.charAt(i), s2.charAt(j)) + memot[i - 1][j - 1];
+						
+						//string 1/2 with gap
+						int s1cgap = this.gp + memot[i - 1][j];
+						int s2cgap = this.gp + memot[i][j - 1];
+						
+						//calc min of 3 values and store preds
+						if (aligncharpen <= s1cgap && aligncharpen <= s2cgap) 
+						{			//case1 is the min
+							memot[i][j] = aligncharpen;
+							predind[i][j][0] = i - 1;
+							predind[i][j][1] = j - 1;
+						}
+						
+						else if (s1cgap <= aligncharpen && s1cgap <= s2cgap) 
+						{
+							memot[i][j] = s1cgap;
+							predind[i][j][0] = i - 1;
+							predind[i][j][1] = j;
+						}
+						
+						else 
+						{
+							memot[i][j] = s2cgap;
+							predind[i][j][0] = i;
+							predind[i][j][1] = j - 1;
+						}
+					}
+				}
+	}
+	
+	public String getAlignment()
+	{
+		String getAlign;
+		String s1a = ""; 
+		String s2a = "";
+
+		//accounting for beginning space
+		int i = s1.length() - 1; 
+		int j = s2.length() - 1;
+
+		//retrace table calculations. stops at start of 1 sequence
+		while (i > 0 && j > 0) 
+		{
+			//both aligned
+			if (memot[i][j] - penalty(s1.charAt(i), s2.charAt(j)) == memot[i - 1][j - 1]) 
+			{
+				s1a = s1.charAt(i) + s1a;
+				s2a = s2.charAt(j) + s2a;
+				i--;
+				j--;
+			}
+			
+			else if (memot[i][j] - this.gp == memot[i - 1][j]) 
+			{ 
+				s1a = s1.charAt(i) + s1a;
+				s2a = line + s2a;
+				i--;
+			}
+			
+			else if (memot[i][j] - this.gp == memot[i][j - 1]) 
+			{
+				s2a = s2.charAt(j) + s2a;
+				s1a = line + s1a;
+				j--;
+			}
+		}
+		
+		//add any leading gaps to start of sequence where pointer not 0
+		while (i > 0) 
+		{
+			s1a = s1.charAt(i) + s1a;
+			s2a = line + s2a;
+			i--;
+		}
+		
+		while (j > 0) 
+		{
+			s2a = s2.charAt(j) + s2a;
+			s1a = line + s1a;
+			j--;
+		}
+		
+		//appends 2 strings together after acquiring their alignment
+		getAlign = s1a + " " + s2a;
+		return getAlign;
+	}
+	
+	//checks 2 chars and returns the penalty amount based on penalty
+	private int penalty(char char1, char char2) 
+	{
+		//same symbol
+		if (char1 == char2) 
+		{
+			return 0;
+		}
+		
+		// consonant with diff consonant
+		else if (consonants.contains(char1) && consonants.contains(char2)) 
+		{
+			return 1;
+		}
+		
+		//vowel with diff vowel
+		else if (vowels.contains(char1) && vowels.contains(char2)) 
+		{
+			return 1;
+		}
+		
+		//otherwise vowel with consonant
+		return 3;
+	}
+}

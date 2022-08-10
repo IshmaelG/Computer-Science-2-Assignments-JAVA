@@ -1,0 +1,49 @@
+package addressbook;
+
+public class AddressBookTree<T,U> 
+{
+	private T name;
+	private U office;
+	
+	public AddressBookTree()
+	{
+		name = null;
+		office = null;
+	}
+
+}
+
+class Node<T,U> 
+{
+    public static final int BLACK = 0;
+    public static final int RED = 1;
+	// the key of each node
+	public T name;
+	public U  office;
+
+    Node<T, U> parent;
+    Node<T, U> left;
+    Node<T, U> right;
+    public int numLeft = 0;
+    public int numRight = 0;
+    // the color of a node
+    public int color;
+
+    Node()
+    {
+        color = BLACK;
+        numLeft = 0;
+        numRight = 0;
+        parent = null;
+        left = null;
+        right = null;
+    }
+
+	// Constructor which sets key to the argument.
+	Node(T name, U office)
+	{
+        this();
+        this.name = name;
+        this.office = office;
+	}
+}

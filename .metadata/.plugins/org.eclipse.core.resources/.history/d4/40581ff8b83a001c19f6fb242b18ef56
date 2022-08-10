@@ -1,0 +1,253 @@
+package addressbook;
+
+public class AddressBookTree<T extends Comparable<T>,U> 
+{
+	private Node<T,U> nil = new Node<T,U>();
+	private Node<T,U> root = nil;
+	
+	
+	public AddressBookTree()
+	{
+		root.parent = nil;
+		root.left = nil;
+		root.right = nil;
+	}
+	
+	private void insert(T name, U office)
+	{
+		Node<T,U> z = new Node<T, U>(name, office);
+		Node<T,U> y = nil;
+		Node<T,U> x = root;
+		
+		while(x != nil)
+		{
+			y = x;
+			
+			if(z.name.compareTo(x.name) < 0)
+			{
+				x = x.left;
+			}
+			
+			else
+			{
+				x = x.right;
+			}
+			
+			z.parent = y;
+			
+			if(y == nil)
+				root = z;
+			else if(z.name.compareTo(y.name) < 0)
+				y.left = z;
+			else
+				y.right = z;
+			
+			z.left = nil;
+			z.right = nil;
+			z.color = Node.R;
+			insertfix(z);
+		}
+	} 
+	
+	private void insertfix(Node<T,U> z)
+	{
+		Node<T,U> y = nil;
+		
+		while (z.parent.color == Node.R)
+		{
+
+			// If z parent is left child
+			if (z.parent == z.parent.parent.left)
+			{
+
+				// Initialize y to z 's cousin
+				y = z.parent.parent.right;
+
+				// Case 1: if y is red...recolor
+				if (y.color == Node.R){
+					z.parent.color = Node.B;
+					y.color = Node.B;
+					z.parent.parent.color = Node.R;
+					z = z.parent.parent;
+				}
+				// Case 2: if y is black & z is a right child
+				else if (z == z.parent.right)
+				{
+
+					// leftRotaet around z's parent
+					z = z.parent;
+					leftrotate(z);
+				}
+
+				// Case 3: else y is black & z is a left child
+				else
+				{
+					// recolor and rotate round z's grandpa
+					z.parent.color = Node.B;
+					z.parent.parent.color = Node.R;
+					rightrotate(z.parent.parent);
+				}
+			}
+
+			// If z's parent is the right child of it's parent.
+			else
+			{
+
+				// Initialize y to z's cousin
+				y = z.parent.parent.left;
+
+				// Case 1: if y is red...recolor
+				if (y.color == Node.R){
+					z.parent.color = Node.B;
+					y.color = Node.B;
+					z.parent.parent.color = Node.R;
+					z = z.parent.parent;
+				}
+
+				// Case 2: if y is black and z is a left child
+				else if (z == z.parent.left)
+				{
+					// rightRotate around z's parent
+					z = z.parent;
+					rightrotate(z);
+				}
+				// Case 3: if y  is black and z is a right child
+				else
+				{
+					// recolor and rotate around z's grandpa
+					z.parent.color = Node.B;
+					z.parent.parent.color = Node.R;
+					leftrotate(z.parent.parent);
+				}
+			}
+		}
+	// Color root black at all times
+	root.color = Node.B;
+	}
+	
+	private void delete(T name)
+	{
+		Node<T,U> z = root;
+		while (z != nil)
+		{
+			if (z.name.compareTo(name) < 0)
+				z = z.right;
+
+			else
+				z = z.left;
+		}
+
+		// Declare variables
+		RedBlackNode<T> x = nil;
+		RedBlackNode<T> y = nil;
+
+		// if either one of z's children is nil, then we must remove z
+		if (isNil(z.left) || isNil(z.right))
+			y = z;
+
+		// else we must remove the successor of z
+		else y = treeSuccessor(z);
+
+		// Let x be the left or right child of y (y can only have one child)
+		if (!isNil(y.left))
+			x = y.left;
+		else
+			x = y.right;
+
+		// link x's parent to y's parent
+		x.parent = y.parent;
+
+		// If y's parent is nil, then x is the root
+		if (isNil(y.parent))
+			root = x;
+
+		// else if y is a left child, set x to be y's left sibling
+		else if (!isNil(y.parent.left) && y.parent.left == y)
+			y.parent.left = x;
+
+		// else if y is a right child, set x to be y's right sibling
+		else if (!isNil(y.parent.right) && y.parent.right == y)
+			y.parent.right = x;
+
+		// if y != z, trasfer y's satellite data into z.
+		if (y != z){
+			z.key = y.key;
+		}
+
+		// Update the numLeft and numRight numbers which might need
+		// updating due to the deletion of z.key.
+		fixNodeData(x,y);
+
+		// If y's color is black, it is a violation of the
+		// RedBlackTree properties so call removeFixup()
+		if (y.color == RedBlackNode.BLACK)
+			removeFixup(x);
+	}
+	
+	private void deletefix(Node z)
+	{
+		
+	}
+	
+	private void leftrotate(Node z)
+	{
+		
+	}
+	
+	private void rightrotate(Node z)
+	{
+		
+	}
+	
+	private void transplant(Node x, Node y)
+	{
+		
+	}
+	
+	private void display()
+	{
+		
+	}
+	
+	private int countBlack()
+	{
+		return 0;
+	}
+	
+	private int countRed()
+	{
+		return 0;
+	}
+
+}
+
+class Node<T extends Comparable<T>,U> 
+{
+    public static final int B = 0;
+    public static final int R = 1;
+	// the key of each node
+	public T name;
+	public U  office;
+
+    Node<T, U> parent;
+    Node<T, U> left;
+    Node<T, U> right;
+    // the color of a node
+    public int color;
+
+    Node()
+    {
+        color = B;
+        parent = null;
+        left = null;
+        right = null;
+    }
+
+	// Constructor which sets key to the argument.
+	Node(T name, U office)
+	{
+        this();
+        this.name = name;
+        this.office = office;
+	}
+}

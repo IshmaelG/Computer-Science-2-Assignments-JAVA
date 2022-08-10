@@ -1,0 +1,142 @@
+package sequencealignment;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Arrays;
+
+public class SequenceAlignment 
+{
+	private static final Set<Character> vowels = new HashSet<>(Arrays.asList(new Character[] { 'a', 'e', 'i', 'o', 'u' }));
+	private static final Set<Character> consonants = new HashSet<>(Arrays.asList(new Character[] { 'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z' }));
+	private int gp = 2;
+	private int vp = 1;
+	private int cp = 1;
+	private int vcp = 3;
+	private int[][] memoTable;
+	private int[][][] predecessorIndexes;
+	static final String line = "-";
+	String s1;
+	String s2;
+	
+	public SequenceAlignment(String s1, String s2)
+	{
+		this.s1 = s1;
+		this.s2 = s2;
+	}
+	
+	public void computeAlignment(int z)
+	{
+		s1 = " " + s1;
+		s2 = " " + s2;
+		//Initialize 2D arrays for memoization
+				memoTable = new int[s1.length()][s2.length()];
+				predecessorIndexes = new int[s1.length()][s2.length()][2];
+
+				//Array bounds are < seq1.length() (not <= ) since both sequences have a blank space @ the start
+				//Fill 0th column
+				for (int i = 0; i < s1.length(); i++) {	// base case: j = 0
+					memoTable[i][0] = i * this.gp;
+					predecessorIndexes[i][0][0] = i - 1;
+					predecessorIndexes[i][0][1] = 0;
+				}
+				//Fill 0th row
+				for (int j = 0; j < s2.length(); j++) {	// base case: i = 0
+					memoTable[0][j] = j * this.gp;
+					predecessorIndexes[0][j][0] = 0;
+					predecessorIndexes[0][j][1] = j - 1;
+				}
+				//Set upper left with negative predecessor since it has no predecessor
+				predecessorIndexes[0][0][0] = -1;
+				predecessorIndexes[0][0][1] = -1;
+
+
+				//Fill rest of memo table
+				for (int j = 1; j < s2.length(); j++) {
+					for (int i = 1; i < s1.length(); i++) {
+						int alignedCharWithCharPenalty = mismatchPenalty(s1.charAt(i), s2.charAt(j)) + memoTable[i - 1][j - 1];	//case1: seq1[i] & seq2[j] aligned with each other
+						int seq1CharWithGap = this.gp + memoTable[i - 1][j];		//case2: seq1 with gap
+						int seq2CharWithGap = this.gp + memoTable[i][j - 1];		//case3: seq2 with gap
+						//Calculate the min of 3 values & store predecessors
+						if (alignedCharWithCharPenalty <= seq1CharWithGap && alignedCharWithCharPenalty <= seq2CharWithGap) {			//case1 is the min
+							memoTable[i][j] = alignedCharWithCharPenalty;
+							predecessorIndexes[i][j][0] = i - 1;
+							predecessorIndexes[i][j][1] = j - 1;
+						}
+						else if (seq1CharWithGap <= alignedCharWithCharPenalty && seq1CharWithGap <= seq2CharWithGap) {	//case2 is the min
+							memoTable[i][j] = seq1CharWithGap;
+							predecessorIndexes[i][j][0] = i - 1;
+							predecessorIndexes[i][j][1] = j;
+						}
+						else {	//case3 is the min
+							memoTable[i][j] = seq2CharWithGap;
+							predecessorIndexes[i][j][0] = i;
+							predecessorIndexes[i][j][1] = j - 1;
+						}
+					}
+				}
+	}
+	
+	public String getAlignment()
+	{
+		String getAlign;
+		String seq1Aligned = ""; 	//Holds the actual sequence with gaps added
+		String seq2Aligned = "";
+
+		int i = s1.length() - 1; //-1 since seq1 & seq2 have leading space
+		int j = s2.length() - 1;
+
+		//Retrace the memoTable calculations. Stops when reaches the start of 1 sequence (so additional gaps may still need to be added to the other)
+		while (i > 0 && j > 0) {
+			if (memoTable[i][j] - mismatchPenalty(s1.charAt(i), s2.charAt(j)) == memoTable[i - 1][j - 1]) { //case1: both aligned
+				seq1Aligned = s1.charAt(i) + seq1Aligned;
+				seq2Aligned = s2.charAt(j) + seq2Aligned;
+				i--;
+				j--;
+			}
+			else if (memoTable[i][j] - this.gp == memoTable[i - 1][j]) { //case2: seq1 with gap
+				seq1Aligned = s1.charAt(i) + seq1Aligned;
+				seq2Aligned = line + seq2Aligned;
+				i--;
+			}
+			else if (memoTable[i][j] - this.gp == memoTable[i][j - 1]) { //case3: seq2 with gap
+				seq2Aligned = s2.charAt(j) + seq2Aligned;
+				seq1Aligned = line + seq1Aligned;
+				j--;
+			}
+		}
+		//Now i==0 or j==0 or both. Finish by adding any additional leading gaps to the start of the sequence whose pointer ISN'T == 0
+		while (i > 0) {		//Seq1 reached the beginning, print rest of seq2 & add gaps to seq2
+			seq1Aligned = s1.charAt(i) + seq1Aligned;
+			seq2Aligned = line + seq2Aligned;
+			i--;
+		}
+		while (j > 0) {		//Seq2 reached the beginning, print rest of seq1 & add gaps to seq2
+			seq2Aligned = s2.charAt(j) + seq2Aligned;
+			seq1Aligned = line + seq1Aligned;
+			j--;
+		}
+		
+		getAlign = seq1Aligned + " " + seq2Aligned;
+		return getAlign;
+	}
+	
+	private int mismatchPenalty(char char1, char char2) 
+	{
+		if (char1 == char2) 
+		{
+			return 0;
+		}
+		
+		else if (consonants.contains(char1) && consonants.contains(char2)) 
+		{
+			return 1;
+		}
+		
+		else if (vowels.contains(char1) && vowels.contains(char2)) 
+		{
+			return 1;
+		}
+		
+		return 3;
+	}
+}

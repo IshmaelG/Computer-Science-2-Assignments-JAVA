@@ -1,0 +1,83 @@
+package lcs;
+
+/* Name: Ishmael Garcia (3526912)
+ * Dr. Andrew Steinberg
+ * COP3503 Fall 2021
+ * Programming Assignment 2
+ */
+
+public class LCS
+{
+	//creatin private attributes
+	private String s1;
+	private String s2;
+	private int s1len;
+	private int s2len;
+	private int[][] LCS_table;
+	private char[] lcs;
+	private int temp;
+	
+	//constructor with passed strings
+	public LCS(String x, String y)
+	{
+		//assigns values passed on passed variables
+		s1 = x;
+		s2 = y;
+		s1len = s1.length();
+		s2len = s2.length();
+	}
+	
+	//longest common sequence algorithm method
+	public void lcsDynamicSol()
+	{
+		LCS_table = new int[s1len + 1][s2len + 1];
+	    //bottom up matrix
+	    for (int i = 0; i <= s1len; i++)
+	    {
+	      for (int j = 0; j <= s2len; j++)
+	      {
+	        if (i == 0 || j == 0)
+	          LCS_table[i][j] = 0;
+	        else if (s1.charAt(i - 1) == s2.charAt(j - 1))
+	          LCS_table[i][j] = LCS_table[i - 1][j - 1] + 1;
+	        else
+	          LCS_table[i][j] = Math.max(LCS_table[i - 1][j], LCS_table[i][j - 1]);
+	      }
+	    }
+
+	    int index = LCS_table[s1len][s2len];
+	    temp = index;
+
+	    lcs = new char[index + 1];
+	    lcs[index] = '\0';
+
+	    int i = s1len, j = s2len;
+	    while (i > 0 && j > 0) {
+	      if (s1.charAt(i - 1) == s2.charAt(j - 1))
+	      {
+	        lcs[index - 1] = s1.charAt(i - 1);
+
+	        i--;
+	        j--;
+	        index--;
+	      }
+
+	      else if (LCS_table[i - 1][j] > LCS_table[i][j - 1])
+	        i--;
+	      else
+	        j--;
+	    }
+	}
+	
+	//getter method that accesses lcs and prints it
+	public String getLCS()
+	{
+		String getL = "";
+		for (int k = 0; k <= temp; k++)
+		{
+		      System.out.print(lcs[k]);
+		      getL = getL + lcs[k];
+		}
+		return getL;
+	}
+}

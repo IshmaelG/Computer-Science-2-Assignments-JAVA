@@ -1,0 +1,72 @@
+package lcs;
+
+public class LCS
+{
+	public String s1;
+	public String s2;
+	public int s1len;
+	public int s2len;
+	public int[][] LCS_table;
+	public char[] lcs;
+	int temp;
+	
+	public LCS(String x, String y)
+	{
+		s1 = x;
+		s2 = y;
+		s1len = s1.length();
+		s2len = s2.length();
+	}
+	
+	public void lcsDynamicSol()
+	{
+		LCS_table = new int[s1len + 1][s2len + 1];
+	    // Building the mtrix in bottom-up way
+	    for (int i = 0; i <= s1len; i++)
+	    {
+	      for (int j = 0; j <= s2len; j++)
+	      {
+	        if (i == 0 || j == 0)
+	          LCS_table[i][j] = 0;
+	        else if (s1.charAt(i - 1) == s2.charAt(j - 1))
+	          LCS_table[i][j] = LCS_table[i - 1][j - 1] + 1;
+	        else
+	          LCS_table[i][j] = Math.max(LCS_table[i - 1][j], LCS_table[i][j - 1]);
+	      }
+	    }
+
+	    int index = LCS_table[s1len][s2len];
+	    temp = index;
+
+	    lcs = new char[index + 1];
+	    lcs[index] = '\0';
+
+	    int i = s1len, j = s2len;
+	    while (i > 0 && j > 0) {
+	      if (s1.charAt(i - 1) == s2.charAt(j - 1))
+	      {
+	        lcs[index - 1] = s1.charAt(i - 1);
+
+	        i--;
+	        j--;
+	        index--;
+	      }
+
+	      else if (LCS_table[i - 1][j] > LCS_table[i][j - 1])
+	        i--;
+	      else
+	        j--;
+	    }
+	}
+	
+	public String getLCS()
+	{
+		String getL = "";
+		for (int k = 0; k <= temp; k++)
+		{
+		      System.out.print(lcs[k]);
+		      getL = getL + lcs[k];
+		}
+		return getL;
+	}
+}

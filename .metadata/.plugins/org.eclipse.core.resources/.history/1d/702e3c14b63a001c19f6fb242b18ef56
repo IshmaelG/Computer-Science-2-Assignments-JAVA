@@ -1,0 +1,117 @@
+package addressbook;
+
+public class AddressBookTree<T extends Comparable<T>,U> 
+{
+	private Node<T,U> nil = new Node<T,U>();
+	private Node<T,U> root = nil;
+	
+	
+	public AddressBookTree()
+	{
+		root.parent = nil;
+		root.left = nil;
+		root.right = nil;
+	}
+	
+	private void insert(T name, U office)
+	{
+		Node<T,U> z = new Node<T, U>(name, office);
+		Node<T,U> y = nil;
+		Node<T,U> x = root;
+		
+		while(x != nil)
+		{
+			y = x;
+			
+			if(z.name.compareTo(x.name) < 0)
+			{
+				x = x.left;
+			}
+			
+			else
+			{
+				x = x.right;
+			}
+			
+			z.parent = y;
+			
+			if(y == nil)
+				root = z;
+			else if(z.name.compareTo(y.name) < 0)
+				y.left = z;
+			else
+				y.right = z;
+		}
+	} 
+	
+	private void insertfix(Node x)
+	{
+	}
+	
+	private void delete(T name)
+	{
+		
+	}
+	
+	private void deletefix(Node x)
+	{
+		
+	}
+	
+	private void rotate(Node x)
+	{
+		
+	}
+	
+	private void transplant(Node x, Node y)
+	{
+		
+	}
+	
+	private void display()
+	{
+		
+	}
+	
+	private int countBlack()
+	{
+		return 0;
+	}
+	
+	private int countRed()
+	{
+		return 0;
+	}
+
+}
+
+class Node<T extends Comparable<T>,U> 
+{
+    public static final int B = 0;
+    public static final int R = 1;
+	// the key of each node
+	public T name;
+	public U  office;
+
+    Node<T, U> parent;
+    Node<T, U> left;
+    Node<T, U> right;
+    // the color of a node
+    public int color;
+
+    Node()
+    {
+        color = B;
+        parent = null;
+        left = null;
+        right = null;
+    }
+
+	// Constructor which sets key to the argument.
+	Node(T name, U office)
+	{
+        this();
+        this.name = name;
+        this.office = office;
+	}
+}
